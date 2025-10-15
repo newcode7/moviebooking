@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmed! 🎉</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark Cinema Background */
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Custom style for the subtle confirmation icon shadow */
+        .icon-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Floating Background Elements Container --- */
+        #background-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            color: #10b981; /* Green color for confirmation */
+            opacity: 0;
+            animation-name: float-fade;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            user-select: none;
+        }
+
+        /* Animation for floating up and fading out */
+        @keyframes float-fade {
+            0% {
+                transform: translateY(100vh) scale(0.6);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.2;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-20vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    
+    <div id="background-elements"></div>
+
+    <div class="max-w-md w-full bg-white p-10 rounded-2xl shadow-2xl border border-green-200 relative z-10 text-center">
+
+        <div class="mb-8">
+            <div class="text-6xl mb-4 icon-shadow text-green-500">
+                ✅
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-green-700">
+                Ticket Booked!
+            </h1>
+            <p class="text-gray-500 mt-2">Your reservation is confirmed.</p>
+        </div>
+
+        <hr class="mb-8 border-gray-200">
+
+        <div id="booking-details" class="text-left space-y-4">
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-sm font-medium text-gray-500">Name:</span>
+                <span id="detail-name" class="text-base font-semibold text-gray-800">Loading...</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-sm font-medium text-gray-500">Movie & Time:</span>
+                <span id="detail-movie" class="text-base font-semibold text-indigo-600">Loading...</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-sm font-medium text-gray-500">Seats:</span>
+                <span id="detail-seats" class="text-base font-semibold text-gray-800">Loading...</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+                <span class="text-sm font-medium text-gray-500">Confirmation ID:</span>
+                <span id="detail-id" class="text-base font-bold text-green-500 tracking-wider">ABC-12345</span>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <a href="index.html" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                Back to Movies
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // --- MOVIE DATA FOR LOOKUP ---
+        const movieOptions = [
+            { id: 1, name: "Dune: Part Two (7:00 PM)" },
+            { id: 2, name: "Oppenheimer (9:30 PM)" },
+            { id: 3, name: "War 2 (6:30 PM)" },
+            { id: 4, name: "The Conjuring: Last Rites (11:00 PM)" },
+            { id: 5, name: "Jurassic World Rebirth (3:45 PM)" },
+            { id: 6, name: "Jolly LLB 3 (7:45 PM)" },
+            { id: 7, name: "Coolie (9:00 PM)" },
+            { id: 8, name: "The Fantastic Four: First Steps (4:00 PM)" },
+            { id: 9, name: "Kantara: A Legend Chapter-1 (8:00 PM)" },
+            { id: 10, name: "The Black Phone 2 (10:30 PM)" },
+            { id: 11, name: "De De Pyaar De 2 (6:00 PM)" },
+            { id: 12, name: "Superman (8:30 PM)" },
+        ];
+
+        // --- FUNCTION TO DISPLAY BOOKING DETAILS ---
+        function displayBookingDetails() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            const name = urlParams.get('name') || 'Guest';
+            const movieId = parseInt(urlParams.get('movie_id'));
+            const seats = urlParams.get('seats') || 'N/A';
+
+            // Find the movie name
+            const movie = movieOptions.find(m => m.id === movieId);
+            const movieName = movie ? movie.name : 'Unknown Movie';
+
+            // Populate the elements
+            document.getElementById('detail-name').textContent = name;
+            document.getElementById('detail-movie').textContent = movieName;
+            document.getElementById('detail-seats').textContent = seats;
+
+            // Generate a simple, unique-looking confirmation ID
+            const randomID = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('detail-id').textContent = `CONF-${randomID}`;
+        }
+
+        // --- BACKGROUND ANIMATION FUNCTIONS (REUSED FROM PREVIOUS PAGE) ---
+        const container = document.getElementById('background-elements');
+        const numElements = 40;
+        
+        // Items for confirmation page float: Checkmark, tickets, popcorn
+        const floatingContent = [
+            "✅", "🎟️", "🍿", "🎉", "Confirmed", "BOOKED", "Enjoy!"
+        ];
+
+        function generateFloatingElement() {
+            for (let i = 0; i < numElements; i++) {
+                const element = document.createElement('span');
+                element.classList.add('floating-element');
+                
+                const content = floatingContent[Math.floor(Math.random() * floatingContent.length)];
+                element.textContent = content;
+
+                let size = Math.random() * 2 + 1;
+                if (content.length <= 2) { 
+                    element.style.fontSize = `${size}rem`;
+                } else { 
+                    element.style.fontSize = `${size * 0.4 + 0.5}rem`;
+                    element.style.fontWeight = 'bold';
+                    element.style.color = '#34d399'; // Brighter green for text
+                }
+
+                element.style.left = `${Math.random() * 100}vw`;
+                
+                const duration = Math.random() * 20 + 15;
+                element.style.animationDuration = `${duration}s`;
+
+                const delay = Math.random() * 20;
+                element.style.animationDelay = `-${delay}s`;
+
+                container.appendChild(element);
+            }
+        }
+
+        // Initialize both the display and animation on load
+        window.onload = () => {
+            displayBookingDetails();
+            generateFloatingElement();
+        };
+    </script>
+</body>
+</html>
